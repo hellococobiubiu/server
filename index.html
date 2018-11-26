@@ -160,6 +160,86 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-article_1" class="article article-type-post  article-index" itemscope="" itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/11/26/article_1/">小飞blog</a>
+    </h1>
+  
+
+        
+        <a href="/2018/11/26/article_1/" class="archive-article-date">
+  	<time datetime="2018-11-26T09:39:42.419Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-11-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><p>Python (3.6.2)<br>Django (1.11.5)<br>djangorestframework (3.6.4)<br>个人博客: <a href="http://xiaofei.ml">小飞博客</a></p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><h3 id="1、创建项目"><a href="#1、创建项目" class="headerlink" title="1、创建项目"></a>1、创建项目</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mkdir drf-test</span><br><span class="line"></span><br><span class="line">cd drf-test</span><br><span class="line"></span><br><span class="line">django-admin.py startproject drfTest</span><br><span class="line"></span><br><span class="line">cd drfTest/</span><br><span class="line"></span><br><span class="line">python manage.py startapp api</span><br></pre></td></tr></table></figure>
+<h3 id="2、修改配置文件"><a href="#2、修改配置文件" class="headerlink" title="2、修改配置文件"></a>2、修改配置文件</h3><p>编辑 drtTest/setting.py 文件，在 INSTALLED_APPS 添加新应用。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">INSTALLED_APPS = (</span><br><span class="line">    ...</span><br><span class="line">    &apos;rest_framework&apos;,</span><br><span class="line">    &apos;api.apps.ApiConfig&apos;,</span><br><span class="line">)</span><br></pre></td></tr></table></figure></p>
+<h3 id="3、创建模型和数据库"><a href="#3、创建模型和数据库" class="headerlink" title="3、创建模型和数据库"></a>3、创建模型和数据库</h3><p>打开 drtTest/models.py 文件，创建一个简单 Product 模型，字段包括 created、name、describe、price、isDelete。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">class Product(models.Model):</span><br><span class="line">    created = models.DateTimeField(auto_now_add=True)</span><br><span class="line">    name = models.CharField(max_length=100, default=&apos;&apos;)</span><br><span class="line">    describe = models.CharField(max_length=500, default=&apos;&apos;)</span><br><span class="line">    price = models.FloatField()</span><br><span class="line">    isDelete = models.BooleanField(default=False)</span><br><span class="line"></span><br><span class="line">    class Meta:</span><br><span class="line">        ordering = (&apos;created&apos;,)</span><br></pre></td></tr></table></figure></p>
+<p>模型迁移，并同步数据库。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">python manage.py makemigrations api</span><br><span class="line">python manage.py migrate</span><br></pre></td></tr></table></figure></p>
+<h3 id="4、创建序列化器"><a href="#4、创建序列化器" class="headerlink" title="4、创建序列化器"></a>4、创建序列化器</h3><p>序列化器可以把模型转换成需要返回的 json、xml 类型数据。在 api 文件下创建 serializers.py 文件。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rom rest_framework import serializers</span><br><span class="line">from snippets.models import Product</span><br><span class="line"></span><br><span class="line">class ProductSerializer(serializers.ModelSerializer):</span><br><span class="line">    class Meta:</span><br><span class="line">        model = Product</span><br><span class="line">        fields = (<span class="string">'id'</span>, <span class="string">'created'</span>, <span class="string">'name'</span>, <span class="string">'describe'</span>, <span class="string">'price'</span>, <span class="string">'isDelete'</span>)</span><br></pre></td></tr></table></figure></p>
+<h3 id="5、url配置"><a href="#5、url配置" class="headerlink" title="5、url配置"></a>5、url配置</h3><p>创建 api/urls.py 文件，用 Router 自动处理 url 和 view 的连接。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">from django.conf.urls import url, include</span><br><span class="line">from api import views</span><br><span class="line"></span><br><span class="line"><span class="comment"># api url 配置</span></span><br><span class="line">urlpatterns = [</span><br><span class="line"></span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<p>在 drtTest/urls.py 中链接 api 应用程序的 url。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rom django.conf.urls import url, include</span><br><span class="line">from api import views</span><br><span class="line"></span><br><span class="line">urlpatterns = [</span><br><span class="line">    url(r&apos;^admin/&apos;, admin.site.urls),</span><br><span class="line">    url(r&apos;^&apos;, include(&apos;api.urls&apos;)),</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<h3 id="6、编写视图"><a href="#6、编写视图" class="headerlink" title="6、编写视图"></a>6、编写视图</h3><p>编写视图有很多种方式，下面使用比较简单的两种：</p>
+<h4 id="1-使用-APIView"><a href="#1-使用-APIView" class="headerlink" title="1.使用 APIView"></a>1.使用 APIView</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">from rest_framework.views import APIView</span><br><span class="line">from django.http import JsonResponse</span><br><span class="line"></span><br><span class="line"><span class="comment"># Create your views here.</span></span><br><span class="line">class GetMessageView(APIView):</span><br><span class="line">    <span class="comment"># get 请求</span></span><br><span class="line">    def get(self, request):</span><br><span class="line">        <span class="comment"># 获取参数数据</span></span><br><span class="line">        get = request.GET</span><br><span class="line">        <span class="comment"># 获取参数 a</span></span><br><span class="line">        a = get.get(<span class="string">'a'</span>)</span><br><span class="line">        <span class="built_in">print</span>(a)</span><br><span class="line">        <span class="comment"># 返回信息</span></span><br><span class="line">        d = &#123;</span><br><span class="line">            <span class="string">'status'</span>: 1,</span><br><span class="line">            <span class="string">'message'</span>: <span class="string">'success'</span>,</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="built_in">return</span> JsonResponse(d)</span><br></pre></td></tr></table></figure>
+<p>api/urls.py 中配置 url<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">urlpatterns = [</span><br><span class="line">      url(r&apos;^test/$&apos;, views.GetMessageView.as_view()),</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<p>终端输入命令，开启服务。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python manage.py runserver</span><br></pre></td></tr></table></figure></p>
+<p>打开浏览器访问<a href="http://127.0.0.1:8000/test/?a=100" target="_blank" rel="noopener">http://127.0.0.1:8000/test/?a=100</a> 接口返回<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;status&quot;: 1, &quot;message&quot;: &quot;success&quot;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>终端输出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">100</span><br><span class="line">[15/Sep/2017 02:39:55] &quot;GET /test/?a=100 HTTP/1.1&quot; 200 35</span><br></pre></td></tr></table></figure></p>
+<h4 id="2-使用-viewsets"><a href="#2-使用-viewsets" class="headerlink" title="2.使用 viewsets"></a>2.使用 viewsets</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">from rest_framework import viewsets</span><br><span class="line">from rest_framework.response import Response</span><br><span class="line">from rest_framework.decorators import detail_route, list_route</span><br><span class="line">from api.serializers import ProductSerializer</span><br><span class="line">from api.models import Product</span><br><span class="line"></span><br><span class="line">class ProductViewSet(viewsets.ModelViewSet):</span><br><span class="line">    queryset = Product.objects.all()</span><br><span class="line">    serializer_class = ProductSerializer</span><br><span class="line"></span><br><span class="line">    @detail_route()</span><br><span class="line">    def changeName(self, request, *args, **kwargs):</span><br><span class="line">        get = request.GET</span><br><span class="line">        product = self.get_object()</span><br><span class="line">        product.name = get.get(&apos;newName&apos;)</span><br><span class="line">        product.save()</span><br><span class="line"></span><br><span class="line">        return Response(product.name)</span><br><span class="line"></span><br><span class="line">    @list_route()</span><br><span class="line">    def filterProducts(self, request):</span><br><span class="line">        products = Product.objects.filter(id__in=range(3))</span><br><span class="line">        serializer = ProductSerializer(products, many=True)</span><br><span class="line"></span><br><span class="line">        return Response(serializer.data)</span><br></pre></td></tr></table></figure>
+<p>api/urls.py 配置 url,使用 Router 自动处理 url 和 view 的连接。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">from rest_framework.routers import DefaultRouter</span><br><span class="line">from api.views import ProductViewSet</span><br><span class="line"></span><br><span class="line">router = DefaultRouter()</span><br><span class="line">router.register(r&apos;product&apos;, views.ProductViewSet)</span><br><span class="line"></span><br><span class="line"># api url 配置</span><br><span class="line">urlpatterns = [</span><br><span class="line">    url(r&apos;^&apos;, include(router.urls)),</span><br><span class="line">    url(r&apos;^test/$&apos;, views.GetMessageView.as_view()),</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<p>终端输入命令，开启服务。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python manage.py runserver</span><br></pre></td></tr></table></figure></p>
+<p>测试<br>获取产品列表: <a href="http://127.0.0.1:8000/product" target="_blank" rel="noopener">http://127.0.0.1:8000/product</a>，没有的话在页面底部添加几条<br>通过产品 id 获取单个产品: <a href="http://127.0.0.1:8000/product/2/" target="_blank" rel="noopener">http://127.0.0.1:8000/product/2/</a><br>修改产品名称: <a href="http://127.0.0.1:8000/product/2/changeName/?newName=qwer" target="_blank" rel="noopener">http://127.0.0.1:8000/product/2/changeName/?newName=qwer</a><br>获取 id 为 0-3 的产品: <a href="http://127.0.0.1:8000/product/filterProducts/" target="_blank" rel="noopener">http://127.0.0.1:8000/product/filterProducts/</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/11/26/article_1/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-hello-world" class="article article-type-post  article-index" itemscope="" itemprop="blogPost">
   <div class="article-inner">
     
